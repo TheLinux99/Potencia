@@ -7,6 +7,7 @@ from pvlib import irradiance
 from pvlib import solarposition
 import pandas as pd
 import numpy as np
+from CDCD import *
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -98,28 +99,47 @@ def radiation(latitude, longitude, month, day, tilt,angle = 0,tz = 'America/Cost
         for k in s:
             if(cont2 > 1):
                 if(k != ''):
-                    irrT.append(float(k))
+                    irrT.append(float(k)*pow((1/1000),2)*1470*1000)
             cont2 += 1
-    print(irrT)
+    print("Irradiacion: ", irrT)
     return irrT
 
 
 def CombineData(latitude, longitude, month, day,tilt,tz, Angles = [0]):
-
     cont = 0
     TotalPower = []
     irr = []
+
+    v = 0
+    i = 0
+    vdata = []
+    idata = []
     while(cont < 5):
         if(cont < len(Angles)):
+            voltages = []
+            currents = []
             irr.append(radiation(latitude,longitude,month,day,tilt[cont],Angles[cont],tz))
+            for i in irr[0]:
+            	current = i/5.3
+            	if(current > 42.9):
+            		current = 42.9
+            	v,i = GetOutput(current, 150)
+            	voltages.append(v)
+            	currents.append(i)
+            vdata.append(voltages)
+            idata.append(currents)
         else:
             irr.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+            vdata.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+            idata.append([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
         cont += 1
-
-
     irr0 = np.array([irr[0], irr[1], irr[2], irr[3], irr[4]])
+    vdata0 = np.array([vdata[0],vdata[1],vdata[2],vdata[3],vdata[4]])
+    idata0 = np.array([idata[0],idata[1],idata[2],idata[3],idata[4]])
     TotalPower = np.sum(irr0,axis = 0)
-    return TotalPower
+    TotalVoltage = np.sum(vdata0,axis = 0)
+    TotalCurrent = np.sum(idata0,axis = 0)
+    return TotalPower, TotalVoltage, TotalCurrent
 
 
 """Obtener Data Irradiation de la Nasa"""
@@ -128,7 +148,7 @@ def GetNasaData(latitude, longitude, month, day):
 
     print("Obteniendo data de la Nasa")
 
-    url = "https://power.larc.nasa.gov/api/temporal/hourly/point?Time=LST&parameters=ALLSKY_SFC_UVA,ALLSKY_SFC_UVB,SZA,ALLSKY_KT,ALLSKY_SFC_SW_DWN,CLRSKY_SFC_SW_DWN&community=RE&longitude=" + str(longitude) + "&latitude="+ str(latitude) + "&start=2018" + str(month) + str(day) + "&end=2018" + str(month) + str(day) + "&format=JSON"
+    url = "https://power.larc.nasa.gov/api/temporal/hourly/point?		Time=LST&parameters=ALLSKY_SFC_UVA,ALLSKY_SFC_UVB,SZA,ALLSKY_KT,ALLSKY_SFC_SW_DWN,CLRSKY_SFC_SW_DWN&community=RE&longitude=" + str(longitude) + "&latitude="+ str(latitude) + "&start=2018" + str(month) + str(day) + "&end=2018" + str(month) + str(day) + "&format=JSON"
 
     print(url)
 

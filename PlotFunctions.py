@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
+from CDCD import *
 
 year = [[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
         [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29],
@@ -119,12 +120,16 @@ def RA(latitude, longitude,tilt = [10],tz = 'America/Costa_Rica', angle = [90]):
     #Obtener los datos de radiacion solicitados
     data = []
     days = []
+    vdata = []
+    idata = []
 
     #Se obtienen los datos de irradiancia para le año
     cont = 1
     day = 0
     hours = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]
     medianData = []
+    medianVoltage = []
+    medianCurrent = []
 
     print("====================================\n")
     print("       Inicio Toma de Datos         \n")
@@ -133,13 +138,17 @@ def RA(latitude, longitude,tilt = [10],tz = 'America/Costa_Rica', angle = [90]):
     for x in year:
         for y in x:
             day += 1
-            r = CombineData(latitude, longitude, cont, y,tilt,tz, angle)
+            r,v,i = CombineData(latitude, longitude, cont, y,tilt,tz, angle)
             data.append(r)
+            vdata.append(v)
+            idata.append(i)
             days.append(day)
             cont2 = 0
             while (cont2 < len(r)):
                 if (r[cont2] != 0):
                     medianData.append(r[cont2])
+                    medianVoltage.append(v[cont2])
+                    medianCurrent.append(i[cont2])
                 cont2 += 1
 
         cont += 1
@@ -152,26 +161,57 @@ def RA(latitude, longitude,tilt = [10],tz = 'America/Costa_Rica', angle = [90]):
     hoursnp = np.array(hours)
     daysnp = np.array(days)
     datanp = np.array(data)
+    vdatanp = np.array(vdata)
+    idatanp = np.array(idata)
     media = np.median(medianData)
+    mediav = np.median(medianVoltage)
+    mediai = np.median(medianCurrent)
 
     print("====================================\n")
-    print("            MEDIA:" + str(media) + "           \n")
+    print("      MEDIA:" + str(media) + "mW           \n")
     print("====================================\n")
+    
+    print("====================================\n")
+    print("      MEDIA Voltage:" + str(mediav) + "V           \n")
+    print("====================================\n")
+    
+    print("====================================\n")
+    print("      MEDIA Corriente:" + str(mediai) + "A           \n")
+    print("====================================\n")
+
 
     #Se preparan los datos para el grafico 3D
 
     X, Y = np.meshgrid(hoursnp, daysnp)
     Z = datanp.reshape(X.shape)
-
+    V = vdatanp.reshape(X.shape)
+    I = idatanp.reshape(X.shape)
     #Se realiza la grafica
 
-    fig = plt.figure()
+    fig = plt.figure(1)
     RAplot = fig.add_subplot(111, projection='3d')
     RAplot.plot_surface(X,Y,Z,cmap=cm.coolwarm,
                        linewidth=0, antialiased=False)
     RAplot.set_xlabel("Horas")
     RAplot.set_ylabel("Dias")
     RAplot.set_zlabel("irradiacion")
+    
+    fig2 = plt.figure(2)
+    RAplot = fig2.add_subplot(111, projection='3d')
+    RAplot.plot_surface(X,Y,V,cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+    RAplot.set_xlabel("Horas")
+    RAplot.set_ylabel("Dias")
+    RAplot.set_zlabel("Voltaje [V]")
+    
+    fig3 = plt.figure(3)
+    RAplot = fig3.add_subplot(111, projection='3d')
+    RAplot.plot_surface(X,Y,I,cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+    RAplot.set_xlabel("Horas")
+    RAplot.set_ylabel("Dias")
+    RAplot.set_zlabel("Corriente [A]")
+    
     plt.show()
 
 
