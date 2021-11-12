@@ -1,9 +1,13 @@
 # Programa diseñado para el curso de Procesamiento Electronico de Potencia EL4201 Instituto Tecnologico de Costa Rica
 
 Desarrollado por:
+
 José Alejandro Angulo Durán
+
 Adrian Nuñez Reina
+
 Carlos Carmona
+
 Carlos Elizondo
 
 # Requerimientos
@@ -13,11 +17,17 @@ Version de python utilizada: 3.8
 Librerias nescesarias:
 
 math
+
 wget
+
 json
+
 os
+
 numpy
+
 matplotlib
+
 pvlib
 
 # Observaciones adicionales
