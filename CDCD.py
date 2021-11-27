@@ -58,4 +58,29 @@ def GetOutput(current, resistance):
 	#print("Voltage = ", voltage, "Current = ", current)
 	return voltage, current
 
+def Supercapacitor(voltage):
+
+	V = voltage
+	circuit = Circuit('Super')
+
+	circuit.V(1,'inp',circuit.gnd, voltage@u_V)
+	circuit.C(1,'inp',circuit.gnd,25@u_F)
+	circuit.R(1, 'inp', circuit.gnd, 150@u_Ω)
+	simulator = circuit.simulator(temperature=25, nominal_temperature=25)
+	analysis = simulator.operating_point()
+	ocurrent = 0
+	ovoltage = 0
+	#print(circuit)
+	
+	for node in analysis.nodes.values():
+		#print(str(node))
+		#print(float(node))
+		#print("Current:",float(node)/resistance)
+		#print("Potencia: ",(float(node)**2)/resistance)
+		if(str(node) == "inp"):
+			ovoltage = float(node)
+			ocurrent = (float(node)**2)/150
+	#print("Voltage = ", voltage, "Current = ", current)
+	return ovoltage, ocurrent
+
 #print("\n Array de Voltaje y Corriente \n", GetOutput(30,150))

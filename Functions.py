@@ -124,6 +124,7 @@ def CombineData(latitude, longitude, month, day,tilt,tz, Angles = [0]):
             	if(current > 42.9):
             		current = 42.9
             	v,i = GetOutput(current, 150)
+            	v,i = Supercapacitor(v)
             	voltages.append(v)
             	currents.append(i)
             vdata.append(voltages)
